@@ -48,7 +48,7 @@
             </router-link>
             <div class="relative" ref="menuRef">
               <button
-                class="w-9 h-9 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                class="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center font-semibold text-base focus:outline-none focus:ring-2 focus:ring-primary/40"
                 :aria-label="`Menu akun untuk ${user.name}`"
                 @click="open = !open"
               >

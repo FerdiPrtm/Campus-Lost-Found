@@ -12,10 +12,10 @@ export default {
         dark: '#0F172A',
         success: '#16A34A',
         warning: '#F59E0B',
-        danger: '#EF4444',
+        danger: '#DC2626',
         'text-primary': '#0F172A',
         'text-secondary': '#64748B',
-        'text-muted': '#94A3B8'
+        'text-muted': '#64748B'
       },
       borderRadius: {
         '2xl': '1rem'
