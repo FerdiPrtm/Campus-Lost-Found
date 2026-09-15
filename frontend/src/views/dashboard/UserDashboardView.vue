@@ -49,22 +49,30 @@
       <!-- Side -->
       <aside class="space-y-8">
         <section>
-          <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center justify-between mb-3">
             <h2 class="text-lg font-bold">Notifikasi</h2>
             <router-link to="/notifications" class="text-sm text-primary font-medium hover:underline">Lihat semua</router-link>
           </div>
           <div v-if="!recentNotifications.length" class="text-sm text-text-muted card p-4">Belum ada notifikasi.</div>
-          <div v-else class="space-y-2">
-            <router-link
-              v-for="n in recentNotifications"
-              :key="n.id"
-              :to="n.reference_id ? `/items/${n.reference_id}` : '/notifications'"
-              class="card p-3 text-sm truncate card-hover"
-            >
-              <p class="font-semibold truncate">{{ n.title }}</p>
-              <p class="text-xs text-text-muted truncate">{{ n.message }}</p>
-            </router-link>
-          </div>
+          <ul v-else class="card divide-y divide-slate-100">
+            <li v-for="n in recentNotifications.slice(0, 3)" :key="n.id" class="first:rounded-t-2xl last:rounded-b-2xl">
+              <router-link
+                :to="n.reference_id ? `/items/${n.reference_id}` : '/notifications'"
+                class="flex items-start gap-3 px-4 py-3 hover:bg-slate-50"
+              >
+                <span class="w-8 h-8 rounded-lg bg-slate-100 shrink-0 flex items-center justify-center">
+                  <MessageSquare v-if="n.type === 'new_message'" class="w-4 h-4 text-primary" />
+                  <Sparkles v-else-if="n.type === 'possible_match'" class="w-4 h-4 text-warning" />
+                  <Info v-else class="w-4 h-4 text-primary" />
+                </span>
+                <span class="min-w-0 flex-1">
+                  <p class="text-sm font-medium truncate">{{ n.title }}</p>
+                  <p class="text-xs text-text-muted truncate">{{ n.message }}</p>
+                </span>
+                <span v-if="!n.is_read" class="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />
+              </router-link>
+            </li>
+          </ul>
         </section>
 
         <section>
@@ -86,6 +94,7 @@ import { api } from '../../api'
 import { authStore } from '../../store/auth'
 import EmptyState from '../../components/ui/EmptyState.vue'
 import StatusBadge from '../../components/ui/StatusBadge.vue'
+import { MessageSquare, Sparkles, Info } from 'lucide-vue-next'
 
 const stats = ref(null)
 const reports = ref([])

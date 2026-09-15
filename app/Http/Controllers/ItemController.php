@@ -202,6 +202,8 @@ class ItemController extends Controller
             Storage::disk('public')->delete($item->image);
         }
 
+        AppNotification::where('reference_id', $item->id)->delete();
+
         $item->delete();
 
         return ApiResponse::ok();

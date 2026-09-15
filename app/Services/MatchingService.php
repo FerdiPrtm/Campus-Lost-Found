@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AppNotification;
 use App\Models\Item;
+use App\Models\User;
 use Carbon\CarbonImmutable;
 
 final class MatchingService
@@ -36,20 +37,23 @@ final class MatchingService
     }
 
     /**
-     * When a new found item is published, alert the owners of matching lost items.
+     * Notify owners of matching items whenever a new lost or found item is published.
      */
     public static function notifyMatchesFor(Item $item): void
     {
-        if ($item->type !== 'found') {
-            return;
-        }
-
         foreach (self::forItem($item) as $match) {
+            $owner = User::find($match['item']['user_id']);
+            if (! $owner || $owner->id === $item->user_id) {
+                continue;
+            }
+
             AppNotification::create([
-                'user_id' => $match['item']['user_id'],
+                'user_id' => $owner->id,
                 'type' => 'possible_match',
-                'title' => 'Kemungkinan cocok ditemukan!',
-                'message' => "Laporan lain mungkin cocok dengan barang hilangmu '{$match['item']['name']}'.",
+                'title' => 'Kemungkinan cocok!',
+                'message' => $item->type === 'found'
+                    ? "Ada temuan baru '{$item->name}' yang mungkin cocok dengan laporanmu."
+                    : "Ada laporan kehilangan baru '{$item->name}' yang mungkin cocok dengan temuanmu.",
                 'reference_id' => $item->id,
             ]);
         }

@@ -15,7 +15,9 @@ class NotificationController extends Controller
             ->limit(50)
             ->get();
 
-        $unread = $notifications->where('is_read', false)->count();
+        $unread = AppNotification::where('user_id', $request->user()->id)
+            ->where('is_read', false)
+            ->count();
 
         return ApiResponse::ok([
             'items' => $notifications->map(fn (AppNotification $n) => [

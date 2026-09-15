@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppNotification;
 use App\Models\Item;
 use App\Models\User;
 use App\Support\ApiResponse;
@@ -116,6 +117,7 @@ class AdminController extends Controller
             if ($item->image) {
                 Storage::disk('public')->delete($item->image);
             }
+            AppNotification::where('reference_id', $item->id)->delete();
             $item->delete();
 
             return ApiResponse::ok();

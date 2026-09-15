@@ -11,7 +11,7 @@
     <div v-if="loading" class="space-y-3">
       <div v-for="i in 5" :key="i" class="card h-20 animate-pulse bg-slate-100" />
     </div>
-    <EmptyState v-else-if="!items.length" title="Tidak ada notifikasi" message="Kamu akan mendapat notifikasi saat ada kemungkinan cocok atau pembaruan klaim." />
+    <EmptyState v-else-if="!items.length" title="Tidak ada notifikasi" message="Kamu akan mendapat notifikasi saat ada kemungkinan cocok, pesan masuk, atau pembaruan laporanmu." />
 
     <div v-else class="space-y-2.5">
       <router-link
