@@ -48,14 +48,10 @@ class ItemController extends Controller
             $query->where('location', $location);
         }
 
-        $query->orderBy('created_at', match ($request->input('sort')) {
-            'oldest' => 'asc',
-            'recently_updated' => 'desc',
-            default => 'desc',
-        });
-
         if ($request->input('sort') === 'recently_updated') {
             $query->orderByDesc('updated_at');
+        } else {
+            $query->orderBy('created_at', $request->input('sort') === 'oldest' ? 'asc' : 'desc');
         }
 
         $page = max(1, (int) $request->input('page', 1));
@@ -75,7 +71,7 @@ class ItemController extends Controller
 
     public function show(Request $request, int $id): \Illuminate\Http\JsonResponse
     {
-        $item = Item::with('user:id,name')->findOrFail($id);
+        $item = Item::with('user:id,name,email')->findOrFail($id);
 
         $user = $request->user();
         $isOwner = $user && $item->user_id === $user->id;
@@ -85,7 +81,7 @@ class ItemController extends Controller
             return ApiResponse::fail('Tidak ditemukan.', 404);
         }
 
-        return ApiResponse::ok($this->detailItem($item, $isOwner || $isStaff));
+        return ApiResponse::ok($this->detailItem($item));
     }
 
     public function store(Request $request): \Illuminate\Http\JsonResponse
@@ -96,11 +92,10 @@ class ItemController extends Controller
             'category' => ['required', 'string', 'exists:categories,name'],
             'location' => ['required', 'string', 'exists:locations,name'],
             'description' => ['nullable', 'string', 'max:5000'],
-            'date' => ['required', 'date'],
+            'date' => ['required', 'date', 'before_or_equal:today'],
             'time' => ['nullable', 'date_format:H:i'],
             'storage_location' => ['nullable', 'string', 'max:191'],
             'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
-            'verification_answers' => ['nullable', 'json'],
         ]);
 
         if ($validator->fails()) {
@@ -109,10 +104,15 @@ class ItemController extends Controller
 
         $data = $validator->validated();
 
-        $answers = collect(json_decode($data['verification_answers'] ?? '[]', true) ?: [])
-            ->filter(fn (array $qa) => trim((string) ($qa['q'] ?? '')) !== '' && trim((string) ($qa['a'] ?? '')) !== '')
-            ->values()
-            ->all();
+        $duplicate = Item::where('user_id', $request->user()->id)
+            ->where('name', $data['name'])
+            ->where('type', $data['type'])
+            ->whereIn('status', ['lost', 'found'])
+            ->exists();
+
+        if ($duplicate) {
+            return ApiResponse::fail('Kamu sudah melaporkan item dengan nama yang sama. Periksa Laporanku.', 422);
+        }
 
         $image = $request->hasFile('image')
             ? $request->file('image')->store('items', 'public')
@@ -131,9 +131,8 @@ class ItemController extends Controller
             'time' => $data['time'] ?? null,
             'storage_location' => $data['storage_location'] ?? null,
             'image' => $image,
-            'verification_answers' => $answers ?: null,
             'status' => $status,
-            'moderation_status' => 'pending',
+            'moderation_status' => 'approved',
         ]);
 
         MatchingService::notifyMatchesFor($item);
@@ -153,7 +152,7 @@ class ItemController extends Controller
 
     public function update(Request $request, int $id): \Illuminate\Http\JsonResponse
     {
-        $item = Item::with('user:id,name')->findOrFail($id);
+        $item = Item::with('user:id,name,email')->findOrFail($id);
 
         $user = $request->user();
         if ($item->user_id !== $user->id && ! $user->isStaff()) {
@@ -167,6 +166,8 @@ class ItemController extends Controller
             'location' => ['nullable', 'string', 'exists:locations,name'],
             'description' => ['nullable', 'string', 'max:5000'],
             'storage_location' => ['nullable', 'string', 'max:191'],
+            'date' => ['nullable', 'date', 'before_or_equal:today'],
+            'time' => ['nullable', 'date_format:H:i'],
         ]);
 
         if ($validator->fails()) {
@@ -175,29 +176,17 @@ class ItemController extends Controller
 
         $data = collect($validator->validated())->filter(fn ($value) => $value !== null)->all();
 
-        $wasReturned = false;
-        if (isset($data['status']) && $data['status'] === 'returned' && $item->status !== 'returned') {
-            $wasReturned = true;
+        if (isset($data['status']) && $data['status'] !== $item->status && ! $user->isStaff()) {
+            if (! in_array($data['status'], ['lost', 'found', 'returned'], true)) {
+                return ApiResponse::fail('Status diperbolehkan: hilang, ditemukan, atau dikembalikan.', 422);
+            }
         }
 
         $item->update($data);
 
-        $item->load('user:id,name');
+        $item->load('user:id,name,email');
 
-        if ($wasReturned) {
-            $approved = $item->claims()->where('status', 'approved')->latest()->first();
-            if ($approved) {
-                \App\Models\AppNotification::create([
-                    'user_id' => $approved->user_id,
-                    'type' => 'item_returned',
-                    'title' => 'Barang dikembalikan',
-                    'message' => "Barang '{$item->name}' telah ditandai dikembalikan.",
-                    'reference_id' => $item->id,
-                ]);
-            }
-        }
-
-        return ApiResponse::ok($this->detailItem($item, true));
+        return ApiResponse::ok($this->detailItem($item));
     }
 
     public function destroy(Request $request, int $id): \Illuminate\Http\JsonResponse
@@ -232,6 +221,7 @@ class ItemController extends Controller
             'category' => $item->category,
             'location' => $item->location,
             'date' => $item->date,
+            'time' => $item->time,
             'description' => $item->description,
             'image' => $item->image,
             'created_at' => $item->created_at,
@@ -241,19 +231,13 @@ class ItemController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function detailItem(Item $item, bool $includeAnswers): array
+    private function detailItem(Item $item): array
     {
-        $answers = $item->verification_answers;
-
-        if ($answers && ! $includeAnswers) {
-            $answers = collect($answers)->map(fn (array $qa) => ['q' => $qa['q']])->all();
-        }
-
         return $this->publicItem($item) + [
             'user' => $item->user ? ['id' => $item->user->id, 'name' => $item->user->name] : null,
+            'contact_email' => $item->moderation_status === 'approved' && $item->user ? $item->user->email : null,
             'storage_location' => $item->storage_location,
             'moderation_status' => $item->moderation_status,
-            'verification_answers' => $answers,
             'matches' => MatchingService::forItem($item),
         ];
     }

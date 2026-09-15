@@ -27,6 +27,7 @@
           :class="iconClass(n.type)"
         >
           <BellRing v-if="n.type === 'possible_match'" class="w-5 h-5 text-warning" />
+          <MessageSquare v-else-if="n.type === 'new_message'" class="w-5 h-5 text-primary" />
           <CheckCircle2 v-else-if="['claim_approved', 'item_returned'].includes(n.type)" class="w-5 h-5 text-success" />
           <XCircle v-else-if="n.type === 'claim_rejected'" class="w-5 h-5 text-danger" />
           <Info v-else class="w-5 h-5 text-primary" />
@@ -46,7 +47,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { BellRing, CheckCircle2, XCircle, Info } from 'lucide-vue-next'
+import { BellRing, CheckCircle2, XCircle, Info, MessageSquare } from 'lucide-vue-next'
 import { api } from '../../api'
 import EmptyState from '../../components/ui/EmptyState.vue'
 
@@ -56,6 +57,7 @@ const loading = ref(true)
 
 function iconClass(type) {
   if (type === 'possible_match') return 'bg-amber-50'
+  if (type === 'new_message') return 'bg-primary/10'
   if (['claim_approved', 'item_returned'].includes(type)) return 'bg-emerald-50'
   if (type === 'claim_rejected') return 'bg-red-50'
   return 'bg-primary/10'

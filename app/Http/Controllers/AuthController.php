@@ -25,15 +25,19 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:191'],
             'email' => ['required', 'string', 'email', 'max:191', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6'],
-            'role' => ['required', 'in:student,staff'],
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
         if ($validator->fails()) {
             return ApiResponse::fail($validator->errors()->first(), 422);
         }
 
-        $user = User::create($validator->validated());
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+            'role' => 'student',
+        ]);
 
         Auth::login($user);
         $request->session()->regenerate();
@@ -66,6 +70,41 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        return ApiResponse::ok();
+    }
+
+    public function updateProfile(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:191'],
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::fail($validator->errors()->first(), 422);
+        }
+
+        $request->user()->update(['name' => $request->input('name')]);
+
+        return ApiResponse::ok($request->user()->toArray());
+    }
+
+    public function updatePassword(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::fail($validator->errors()->first(), 422);
+        }
+
+        if (! password_verify($request->input('current_password'), $request->user()->password)) {
+            return ApiResponse::fail('Password saat ini salah.', 422);
+        }
+
+        $request->user()->update(['password' => $request->input('password')]);
 
         return ApiResponse::ok();
     }

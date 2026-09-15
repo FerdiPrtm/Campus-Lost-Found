@@ -30,11 +30,6 @@ class User extends Authenticatable
         return $this->hasMany(Item::class);
     }
 
-    public function claims(): HasMany
-    {
-        return $this->hasMany(Claim::class);
-    }
-
     public function notifications(): HasMany
     {
         return $this->hasMany(AppNotification::class);

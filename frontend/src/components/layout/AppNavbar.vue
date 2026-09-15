@@ -23,6 +23,12 @@
             <router-link to="/dashboard" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition-colors" active-class="text-primary bg-primary/10">
               Laporanku
             </router-link>
+            <router-link to="/messages" class="relative px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition-colors" aria-label="Chat">
+              <MessageSquare class="w-5 h-5" />
+              <span v-if="chatUnread" class="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full bg-primary text-white text-[10px] font-bold inline-flex items-center justify-center">
+                {{ chatUnread }}
+              </span>
+            </router-link>
             <router-link to="/notifications" class="relative px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition-colors" aria-label="Notifikasi">
               <Bell class="w-5 h-5" />
               <span v-if="unread" class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-danger" />
@@ -59,7 +65,9 @@
                     <p class="text-sm font-semibold truncate">{{ user.name }}</p>
                     <p class="text-xs text-text-muted truncate">{{ user.email }}</p>
                   </div>
-                  <router-link to="/dashboard" class="block px-4 py-2 text-sm hover:bg-slate-50" @click="open = false">Laporanku</router-link>
+<router-link to="/dashboard" class="block px-4 py-2 text-sm hover:bg-slate-50" @click="open = false">Laporanku</router-link>
+                  <router-link to="/messages" class="block px-4 py-2 text-sm hover:bg-slate-50" @click="open = false">Chat</router-link>
+                  <router-link to="/profile" class="block px-4 py-2 text-sm hover:bg-slate-50" @click="open = false">Profil</router-link>
                   <router-link to="/notifications" class="block px-4 py-2 text-sm hover:bg-slate-50" @click="open = false">Notifikasi</router-link>
                   <template v-if="isAdmin">
                     <router-link to="/admin" class="block px-4 py-2 text-sm hover:bg-slate-50" @click="open = false">Dasbor Admin</router-link>
@@ -83,7 +91,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { Search, Bell } from 'lucide-vue-next'
+import { Search, Bell, MessageSquare } from 'lucide-vue-next'
 import { authStore } from '../../store/auth'
 import { api } from '../../api'
 import { useRouter, useRoute } from 'vue-router'
@@ -92,6 +100,7 @@ const router = useRouter()
 const route = useRoute()
 const open = ref(false)
 const unread = ref(0)
+const chatUnread = ref(0)
 const isAuthed = authStore.isAuthed
 const isAdmin = authStore.isAdmin
 const user = authStore.user
@@ -110,12 +119,22 @@ async function pollUnread() {
   } catch {
     /* ignore */
   }
+  try {
+    const data = await api.get('/api/messages/unread')
+    chatUnread.value = data.unread
+  } catch {
+    /* ignore */
+  }
 }
 
 onMounted(() => {
   pollUnread()
   pollTimer = setInterval(pollUnread, 20000)
 })
-watch(isAuthed, () => (unread.value = 0))
+watch(isAuthed, () => {
+  unread.value = 0
+  chatUnread.value = 0
+})
+watch(() => route.fullPath, pollUnread)
 onUnmounted(() => clearInterval(pollTimer))
 </script>

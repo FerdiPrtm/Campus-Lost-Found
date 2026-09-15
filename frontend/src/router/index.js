@@ -10,10 +10,11 @@ const routes = [
   { path: '/report/lost', name: 'report-lost', meta: { requiresAuth: true }, component: () => import('../views/items/ReportItemView.vue'), props: { type: 'lost' } },
   { path: '/report/found', name: 'report-found', meta: { requiresAuth: true }, component: () => import('../views/items/ReportItemView.vue'), props: { type: 'found' } },
   { path: '/dashboard', name: 'dashboard', meta: { requiresAuth: true }, component: () => import('../views/dashboard/UserDashboardView.vue') },
+  { path: '/profile', name: 'profile', meta: { requiresAuth: true }, component: () => import('../views/ProfileView.vue') },
   { path: '/notifications', name: 'notifications', meta: { requiresAuth: true }, component: () => import('../views/notification/NotificationsView.vue') },
+  { path: '/messages', name: 'messages', meta: { requiresAuth: true }, component: () => import('../views/messages/MessagesView.vue') },
   { path: '/admin', name: 'admin', meta: { requiresAdmin: true }, component: () => import('../views/admin/AdminDashboardView.vue') },
   { path: '/admin/reports', name: 'admin-reports', meta: { requiresAdmin: true }, component: () => import('../views/admin/AdminReportsView.vue') },
-  { path: '/admin/claims', name: 'admin-claims', meta: { requiresAdmin: true }, component: () => import('../views/admin/AdminClaimsView.vue') },
   { path: '/admin/users', name: 'admin-users', meta: { requiresAdmin: true }, component: () => import('../views/admin/AdminUsersView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]

@@ -61,7 +61,6 @@ class AdminController extends Controller
                 'found_items' => (clone $approved)->where('type', 'found')->count(),
                 'returned_items' => $returned,
                 'pending_reports' => Item::where('moderation_status', 'pending')->count(),
-                'pending_claims' => \App\Models\Claim::where('status', 'pending')->count(),
                 'total_users' => User::count(),
             ],
             'recent_reports' => $recent,

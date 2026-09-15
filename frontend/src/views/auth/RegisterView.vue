@@ -20,29 +20,8 @@
         </div>
         <div>
           <label class="label" for="password">Password</label>
-          <input v-model="form.password" id="password" type="password" class="input" required minlength="6" autocomplete="new-password" />
-          <p class="text-xs text-text-muted mt-1">Min. 6 karakter</p>
-        </div>
-        <div>
-          <label class="label">Saya adalah seorang</label>
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              class="px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors"
-              :class="form.role === 'student' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 text-text-secondary'"
-              @click="form.role = 'student'"
-            >
-              Mahasiswa
-            </button>
-            <button
-              type="button"
-              class="px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors"
-              :class="form.role === 'staff' ? 'border-primary bg-primary/5 text-primary' : 'border-slate-200 text-text-secondary'"
-              @click="form.role = 'staff'"
-            >
-              Staf
-            </button>
-          </div>
+          <input v-model="form.password" id="password" type="password" class="input" required minlength="8" autocomplete="new-password" />
+          <p class="text-xs text-text-muted mt-1">Min. 8 karakter</p>
         </div>
         <p v-if="error" class="text-sm text-danger">{{ error }}</p>
         <button class="btn btn-primary w-full py-3" :disabled="loading">
@@ -68,7 +47,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const loading = ref(false)
 const error = ref('')
-const form = reactive({ name: '', email: '', password: '', role: 'student' })
+const form = reactive({ name: '', email: '', password: '' })
 
 async function submit() {
   loading.value = true

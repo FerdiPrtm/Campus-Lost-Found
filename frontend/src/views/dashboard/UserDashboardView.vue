@@ -6,7 +6,7 @@
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+    <div class="grid grid-cols-3 gap-4 mb-10">
       <div v-for="s in statCards" :key="s.label" class="card p-5 text-center">
         <p class="text-3xl font-bold text-text-primary">{{ s.value }}</p>
         <p class="text-sm text-text-secondary mt-1">{{ s.label }}</p>
@@ -44,31 +44,7 @@
           </router-link>
         </div>
 
-        <!-- My claims -->
-        <section class="mt-10">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold">Klaim Saya</h2>
-            <span class="text-xs text-text-muted font-medium">{{ claims.length }} total</span>
-          </div>
-          <div v-if="!claims.length" class="text-sm text-text-muted card p-4">
-            Belum ada klaim. Klaim barang yang kamu rasa milikmu dari halaman itemnya.
-          </div>
-          <div v-else class="space-y-3">
-            <router-link
-              v-for="c in claims"
-              :key="c.id"
-              :to="`/items/${c.item_id}`"
-              class="card p-3 flex items-center gap-3 card-hover"
-            >
-              <div class="min-w-0 flex-1">
-                <p class="font-semibold truncate">{{ c.item_name }}</p>
-                <p class="text-xs text-text-muted">Klaim · {{ timeAgo(c.created_at) }}</p>
-              </div>
-              <StatusBadge :status="c.status" />
-            </router-link>
-          </div>
         </section>
-      </section>
 
       <!-- Side -->
       <aside class="space-y-8">
@@ -113,7 +89,6 @@ import StatusBadge from '../../components/ui/StatusBadge.vue'
 
 const stats = ref(null)
 const reports = ref([])
-const claims = ref([])
 const recentNotifications = ref([])
 const loading = ref(true)
 
@@ -129,7 +104,6 @@ const statCards = computed(() => {
   return [
     { label: 'Hilang', value: s.lost || 0 },
     { label: 'Ditemukan', value: s.found || 0 },
-    { label: 'Diklaim', value: s.claimed || 0 },
     { label: 'Dikembalikan', value: s.returned || 0 }
   ]
 })
@@ -147,7 +121,6 @@ onMounted(async () => {
     const data = await api.get('/api/dashboard')
     stats.value = { ...data.stats, total: data.reports.length }
     reports.value = data.reports
-    claims.value = data.claims || []
     recentNotifications.value = data.recent_notifications
   } catch {
     reports.value = []

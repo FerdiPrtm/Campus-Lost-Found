@@ -10,7 +10,7 @@
           <span class="text-indigo-200">Ayo bantu temukan kembali.</span>
         </h1>
         <p class="max-w-xl mx-auto text-indigo-100 text-lg mb-8">
-          Lapor, cari, cocokkan, dan klaim kembali barangmu — semua dalam satu platform kampus.
+          Lapor, cari, cocokkan, dan hubungi pemiliknya — semua dalam satu platform kampus.
         </p>
 
         <div class="max-w-lg mx-auto mb-8">
@@ -129,7 +129,7 @@ const stats = ref([
 const steps = [
   { title: 'Lapor', desc: 'Laporkan barang yang hilang atau ditemukan lengkap dengan foto dan lokasi.' },
   { title: 'Dapatkan kecocokan', desc: 'Sistem mencocokkan laporan dengan barang serupa — kemungkinan cocok muncul otomatis.' },
-  { title: 'Klaim & kembali', desc: 'Klaim barangmu, lalui verifikasi kepemilikan, dan terima kembali barangmu.' }
+  { title: 'Hubungi & kembali', desc: 'Hubungi pelapor langsung lewat email, dan tandai barang sudah kembali.' }
 ]
 
 function goSearch() {

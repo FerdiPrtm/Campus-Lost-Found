@@ -95,20 +95,11 @@
 
       <!-- Verification questions -->
       <section class="card p-6">
-        <h2 class="font-semibold text-lg mb-2">Pertanyaan Verifikasi</h2>
+        <h2 class="font-semibold text-lg mb-2">Kontak</h2>
         <p class="text-sm text-text-secondary mb-4">
-          Pertanyaan ini akan ditanyakan ke pengklaim untuk memverifikasi kepemilikan.
-          Detail sensitif ini tidak ditampilkan di halaman publik.
+          Email akunmu akan ditampilkan sebagai kontak saat laporan disetujui, sehingga pemilik/penemu
+          bisa menghubungimu langsung. Ubah email lewat akunmu jika perlu.
         </p>
-        <div class="space-y-3">
-          <div v-for="(q, i) in form.questions" :key="i" class="grid sm:grid-cols-2 gap-3">
-            <input v-model="q.q" type="text" class="input" :placeholder="`Pertanyaan ${i + 1} (mis. Apa isi di dalam case?)`" />
-            <input v-model="q.a" type="text" class="input" placeholder="Jawaban benar (pribadi)" />
-          </div>
-          <button v-if="form.questions.length < 3" type="button" class="text-sm text-primary font-medium hover:underline" @click="form.questions.push({ q: '', a: '' })">
-            + Tambah pertanyaan
-          </button>
-        </div>
       </section>
 
       <p v-if="error" class="text-sm text-danger">{{ error }}</p>
@@ -147,8 +138,7 @@ const form = reactive({
   date: '',
   time: '',
   location: '',
-  storage_location: '',
-  questions: [{ q: '', a: '' }, { q: '', a: '' }, { q: '', a: '' }]
+  storage_location: ''
 })
 
 function onFile(e) {
@@ -170,10 +160,6 @@ async function submit() {
     fd.append('type', props.type)
     for (const key of ['name', 'category', 'description', 'date', 'time', 'location', 'storage_location']) {
       if (form[key]) fd.append(key, form[key])
-    }
-    const answers = form.questions.filter((q) => q.q.trim() && q.a.trim())
-    if (answers.length) {
-      fd.append('verification_answers', JSON.stringify(answers))
     }
     if (file.value) fd.append('image', file.value)
 

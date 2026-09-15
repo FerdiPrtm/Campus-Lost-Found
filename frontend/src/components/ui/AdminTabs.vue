@@ -17,7 +17,6 @@
 const tabs = [
   { label: 'Ringkasan', to: '/admin' },
   { label: 'Laporan', to: '/admin/reports' },
-  { label: 'Klaim', to: '/admin/claims' },
   { label: 'Pengguna', to: '/admin/users' }
 ]
 </script>

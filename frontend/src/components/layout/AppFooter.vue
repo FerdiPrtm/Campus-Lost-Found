@@ -25,7 +25,7 @@
         <h3 class="text-sm font-semibold mb-3">Kampus</h3>
         <p class="text-sm text-text-secondary">
           Dibangun untuk komunitas kampus. Temukan kembali barangmu lebih cepat
-          lewat kecocokan otomatis dan verifikasi klaim yang aman.
+          lewat kecocokan otomatis dan hubungi pemiliknya langsung.
         </p>
       </div>
     </div>

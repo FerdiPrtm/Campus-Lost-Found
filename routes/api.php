@@ -3,10 +3,10 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,9 +15,11 @@ Route::middleware('web')->group(function () {
     Route::prefix('auth')->group(function () {
         Route::get('csrf', [AuthController::class, 'csrf']);
         Route::get('me', [AuthController::class, 'me']);
-        Route::post('register', [AuthController::class, 'register']);
-        Route::post('login', [AuthController::class, 'login']);
+        Route::post('register', [AuthController::class, 'register'])->middleware('throttle:5,1');
+        Route::post('login', [AuthController::class, 'login'])->middleware('throttle:10,1');
         Route::post('logout', [AuthController::class, 'logout'])->middleware('role');
+        Route::put('profile', [AuthController::class, 'updateProfile'])->middleware('role');
+        Route::put('password', [AuthController::class, 'updatePassword'])->middleware('role');
     });
 
     Route::get('categories', [CategoryController::class, 'index']);
@@ -28,16 +30,18 @@ Route::middleware('web')->group(function () {
     Route::post('items', [ItemController::class, 'store'])->middleware('role');
     Route::put('items/{item}', [ItemController::class, 'update'])->middleware('role');
     Route::delete('items/{item}', [ItemController::class, 'destroy'])->middleware('role');
-    Route::get('items/{item}/claim', [ClaimController::class, 'myClaim'])->middleware('role');
-    Route::post('items/{item}/claims', [ClaimController::class, 'store'])->middleware('role');
-
-    Route::get('claims', [ClaimController::class, 'index'])->middleware('role:admin,staff');
-    Route::post('claims/{claim}/approve', [ClaimController::class, 'approve'])->middleware('role:admin,staff');
-    Route::post('claims/{claim}/reject', [ClaimController::class, 'reject'])->middleware('role:admin,staff');
+    
 
     Route::get('notifications', [NotificationController::class, 'index'])->middleware('role');
     Route::post('notifications/{notification}/read', [NotificationController::class, 'read'])->middleware('role');
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->middleware('role');
+
+    Route::middleware('role')->group(function () {
+        Route::get('messages/conversations', [MessageController::class, 'conversations']);
+        Route::get('messages/thread', [MessageController::class, 'thread']);
+        Route::get('messages/unread', [MessageController::class, 'unread']);
+        Route::post('messages', [MessageController::class, 'store']);
+    });
 
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('role');
 

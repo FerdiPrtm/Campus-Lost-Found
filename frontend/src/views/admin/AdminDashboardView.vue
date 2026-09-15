@@ -97,7 +97,6 @@ const statCards = computed(() => {
     { label: 'Item Ditemukan', value: s.found_items || 0 },
     { label: 'Dikembalikan', value: s.returned_items || 0 },
     { label: 'Laporan Menunggu', value: s.pending_reports || 0 },
-    { label: 'Klaim Menunggu', value: s.pending_claims || 0 },
     { label: 'Pengguna', value: s.total_users || 0 }
   ]
 })
