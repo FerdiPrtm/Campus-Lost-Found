@@ -1,0 +1,50 @@
+<?php
+
+return [
+    'attributes' => [
+        'name' => 'nama',
+        'email' => 'email',
+        'password' => 'kata sandi',
+        'type' => 'tipe',
+        'category' => 'kategori',
+        'location' => 'lokasi',
+        'description' => 'deskripsi',
+        'date' => 'tanggal',
+        'time' => 'waktu',
+        'storage_location' => 'lokasi penyimpanan',
+        'image' => 'foto',
+        'verification_answers' => 'jawaban verifikasi',
+        'answers' => 'jawaban',
+        'current_password' => 'kata sandi saat ini',
+        'status' => 'status',
+        'role' => 'peran',
+        'action' => 'aksi',
+        'reason' => 'alasan',
+    ],
+
+    'required' => 'Kolom :attribute wajib diisi.',
+    'email' => ':attribute harus berupa alamat email yang valid.',
+    'string' => ':attribute harus berupa teks.',
+    'image' => ':attribute harus berupa gambar.',
+    'json' => ':attribute harus berupa JSON yang valid.',
+    'array' => ':attribute harus berupa array.',
+    'integer' => ':attribute harus berupa bilangan bulat.',
+    'date' => ':attribute bukan tanggal yang valid.',
+    'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+    'unique' => ':attribute sudah digunakan.',
+    'max' => [
+        'string' => ':attribute tidak boleh lebih dari :max karakter.',
+    ],
+    'min' => [
+        'string' => ':attribute minimal :min karakter.',
+    ],
+    'in' => ':attribute yang dipilih tidak valid.',
+    'exists' => ':attribute yang dipilih tidak valid.',
+    'date_format' => ':attribute tidak cocok dengan format :format.',
+    'mimes' => ':attribute harus berupa file berjenis: :values.',
+    'enum' => ':attribute yang dipilih tidak valid.',
+    'password' => ':attribute salah.',
+    'size' => [
+        'file' => ':attribute harus berukuran :size kilobyte.',
+    ],
+];

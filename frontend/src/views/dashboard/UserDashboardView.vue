@@ -1,0 +1,158 @@
+<template>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">Selamat {{ greeting }} 👋</h1>
+      <p class="text-text-secondary mt-1">Lacak barang hilang dan temuanmu.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+      <div v-for="s in statCards" :key="s.label" class="card p-5 text-center">
+        <p class="text-3xl font-bold text-text-primary">{{ s.value }}</p>
+        <p class="text-sm text-text-secondary mt-1">{{ s.label }}</p>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- My reports -->
+      <section class="lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold">Laporanku</h2>
+          <span class="text-xs text-text-muted font-medium">{{ stats?.total || 0 }} total</span>
+        </div>
+
+        <div v-if="loading" class="space-y-3">
+          <div v-for="i in 3" :key="i" class="card h-20 animate-pulse bg-slate-100" />
+        </div>
+        <EmptyState v-else-if="!reports.length" title="Belum ada laporan" message="Mulai lapor barang yang hilang atau ditemukan." actionText="Lapor Barang" @action="$router.push('/report/lost')" />
+
+        <div v-else class="space-y-3">
+          <router-link
+            v-for="r in reports"
+            :key="r.id"
+            :to="`/items/${r.id}`"
+            class="card p-4 flex items-center gap-4 card-hover"
+          >
+            <div class="w-12 h-12 rounded-xl bg-slate-100 shrink-0 overflow-hidden">
+              <img v-if="r.image" :src="`/storage/${r.image}`" :alt="r.name" class="w-full h-full object-cover" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold truncate">{{ r.name }}</p>
+              <p class="text-xs text-text-muted">{{ r.location }} · {{ timeAgo(r.created_at) }}</p>
+            </div>
+            <StatusBadge :status="r.status" />
+          </router-link>
+        </div>
+
+        <!-- My claims -->
+        <section class="mt-10">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">Klaim Saya</h2>
+            <span class="text-xs text-text-muted font-medium">{{ claims.length }} total</span>
+          </div>
+          <div v-if="!claims.length" class="text-sm text-text-muted card p-4">
+            Belum ada klaim. Klaim barang yang kamu rasa milikmu dari halaman itemnya.
+          </div>
+          <div v-else class="space-y-3">
+            <router-link
+              v-for="c in claims"
+              :key="c.id"
+              :to="`/items/${c.item_id}`"
+              class="card p-3 flex items-center gap-3 card-hover"
+            >
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold truncate">{{ c.item_name }}</p>
+                <p class="text-xs text-text-muted">Klaim · {{ timeAgo(c.created_at) }}</p>
+              </div>
+              <StatusBadge :status="c.status" />
+            </router-link>
+          </div>
+        </section>
+      </section>
+
+      <!-- Side -->
+      <aside class="space-y-8">
+        <section>
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-bold">Notifikasi</h2>
+            <router-link to="/notifications" class="text-sm text-primary font-medium hover:underline">Lihat semua</router-link>
+          </div>
+          <div v-if="!recentNotifications.length" class="text-sm text-text-muted card p-4">Belum ada notifikasi.</div>
+          <div v-else class="space-y-2">
+            <router-link
+              v-for="n in recentNotifications"
+              :key="n.id"
+              :to="n.reference_id ? `/items/${n.reference_id}` : '/notifications'"
+              class="card p-3 text-sm truncate card-hover"
+            >
+              <p class="font-semibold truncate">{{ n.title }}</p>
+              <p class="text-xs text-text-muted truncate">{{ n.message }}</p>
+            </router-link>
+          </div>
+        </section>
+
+        <section>
+          <h2 class="text-lg font-bold mb-4">Aksi Cepat</h2>
+          <div class="space-y-3">
+            <router-link to="/report/lost" class="btn btn-primary w-full">Lapor Barang Hilang</router-link>
+            <router-link to="/report/found" class="btn btn-secondary w-full">Lapor Barang Ditemukan</router-link>
+            <router-link to="/explore" class="btn btn-secondary w-full">Jelajahi Item</router-link>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { api } from '../../api'
+import { authStore } from '../../store/auth'
+import EmptyState from '../../components/ui/EmptyState.vue'
+import StatusBadge from '../../components/ui/StatusBadge.vue'
+
+const stats = ref(null)
+const reports = ref([])
+const claims = ref([])
+const recentNotifications = ref([])
+const loading = ref(true)
+
+const greeting = computed(() => {
+  const h = new Date().getHours()
+  if (h < 12) return 'pagi'
+  if (h < 18) return 'siang'
+  return 'malam'
+})
+
+const statCards = computed(() => {
+  const s = stats.value || {}
+  return [
+    { label: 'Hilang', value: s.lost || 0 },
+    { label: 'Ditemukan', value: s.found || 0 },
+    { label: 'Diklaim', value: s.claimed || 0 },
+    { label: 'Dikembalikan', value: s.returned || 0 }
+  ]
+})
+
+function timeAgo(str) {
+  const diff = (Date.now() - new Date(str).getTime()) / 1000
+  if (diff < 3600) return `${Math.max(1, Math.floor(diff / 60))} mnt lalu`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`
+  if (diff < 604800) return `${Math.floor(diff / 86400)} hari lalu`
+  return new Date(str).toLocaleDateString('id-ID')
+}
+
+onMounted(async () => {
+  try {
+    const data = await api.get('/api/dashboard')
+    stats.value = { ...data.stats, total: data.reports.length }
+    reports.value = data.reports
+    claims.value = data.claims || []
+    recentNotifications.value = data.recent_notifications
+  } catch {
+    reports.value = []
+  } finally {
+    loading.value = false
+  }
+})
+</script>
