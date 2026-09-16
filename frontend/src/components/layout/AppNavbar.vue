@@ -2,12 +2,22 @@
   <header class="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-slate-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <nav class="flex items-center justify-between h-16">
-        <router-link to="/" class="flex items-center gap-2 font-bold text-lg text-text-primary">
-          <span class="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white">
-            <Search class="w-4 h-4" />
-          </span>
-          <span>Campus Lost<span class="text-primary"> &amp; Found</span></span>
-        </router-link>
+        <div class="flex items-center gap-1">
+          <button
+            class="md:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40"
+            aria-label="Buka menu navigasi"
+            aria-expanded="showSidebar"
+            @click="showSidebar = !showSidebar"
+          >
+            <Menu class="w-6 h-6" />
+          </button>
+          <router-link to="/" class="flex items-center gap-2 font-bold text-lg text-text-primary">
+            <span class="w-8 h-8 rounded-xl bg-primary flex items-center justify-center text-white">
+              <Search class="w-4 h-4" />
+            </span>
+            <span>Campus Lost<span class="text-primary"> &amp; Found</span></span>
+          </router-link>
+        </div>
 
         <div class="hidden md:flex items-center gap-1">
 <router-link to="/explore" class="px-3 py-2 text-sm font-medium rounded-lg hover:bg-slate-100 transition-colors" active-class="text-primary bg-primary/10">
@@ -85,13 +95,15 @@
       </nav>
     </div>
 
-    <div v-if="open" class="fixed inset-0 z-[-1]" @click="open = false" />
+<div v-if="open" class="fixed inset-0 z-[-1]" @click="open = false" />
+    <AppSidebar :open="showSidebar" @close="showSidebar = false" />
   </header>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { Search, Bell, MessageSquare } from 'lucide-vue-next'
+import { Search, Bell, MessageSquare, Menu, X } from 'lucide-vue-next'
+import AppSidebar from './AppSidebar.vue'
 import { authStore } from '../../store/auth'
 import { api } from '../../api'
 import { useRouter, useRoute } from 'vue-router'
@@ -99,6 +111,7 @@ import { useRouter, useRoute } from 'vue-router'
 const router = useRouter()
 const route = useRoute()
 const open = ref(false)
+const showSidebar = ref(false)
 const unread = ref(0)
 const chatUnread = ref(0)
 const isAuthed = authStore.isAuthed
