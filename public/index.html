@@ -4,11 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Campus Lost & Found — barang hilang? Temukan kembali.">
+  <meta name="theme-color" content="#6D5DF6">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <title>Campus Lost & Found</title>
-  <script type="module" crossorigin src="/assets/index-X04dJ4HI.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BPhaT12D.css">
+  <script type="module" crossorigin src="/assets/index-Dy9UcH9J.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BydhM3ni.css">
 </head>
 <body>
   <div id="app"></div>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('/sw.js').catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>
