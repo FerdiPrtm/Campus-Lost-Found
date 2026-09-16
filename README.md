@@ -1,21 +1,22 @@
 # Campus Lost & Found
 
-Backend **Laravel 13** (MySQL) + frontend **Vue 3 SPA** (Vite + Tailwind). Sistem untuk melaporkan, mencari, mencocokkan, dan mengklaim barang hilang & ditemukan di kampus.
+Platform **SPA** untuk melapor, mencari, mencocokkan, dan mengklaim barang hilang & ditemukan di kampus. Backend Laravel (MySQL) + SPA Vue 3 + Tailwind.
 
 ## Fitur
 
-- Lapor barang hilang / ditemukan, lengkap dengan foto & pertanyaan verifikasi
-- Pencarian + filter (status, tipe, kategori, lokasi) + sorting
-- Possible match otomatis (skor kategori/lokasi/waktu/teks, ambang 50)
-- Klaim barang → verifikasi jawaban (server-side, jawaban benar tidak pernah dikirim ke klien) → admin approve/reject
-- Notifikasi (possible match, klaim baru, klaim disetujui/ditolak, barang di-return)
-- Dashboard user & admin (statistik + grafik)
-- Moderasi laporan oleh admin (approve/reject/suspend/delete)
-- CSRF protect (session-based) untuk seluruh API
+- **Auto-publish** — laporan langsung tampil untuk semua orang (moderasi admin tetap ada sebagai jalur lanjutan/penurunan, bukan penunda).
+- Lapor barang hilang/ditemukan dengan foto + kategori + lokasi + jawaban verifikasi.
+- Pencarian + filter: **mobile** pakai chip tipe/status + **bottom-sheet** (kategori/lokasi/urutan), desktop pakai filter 4 kolom + sort.
+- **Possible match** otomatis (skor kategori/lokasi/waktu/teks, ambang 50) — notifikasi **dua arah**: pemilik & penemu (kecuali ke diri sendiri).
+- Klaim barang → jawaban verifikasi divalidasi **di server** (jawaban benar tidak pernah dikirim ke klien) → admin approve/reject.
+- Chat 1-lawan-1 (pemilik ↔ responden), polling, badge unread, lampiran nama item pada thread.
+- Notifikasi: possible match, pesan baru, laporan baru, dsb — hapus item otomatis membersihkan notifikasi-nya.
+- Dashboard user (statistik, laporanku, notifikasi terbaru, **sapaan dengan nama user**) & dashboard admin (grafik, moderasi, kelola user).
+- Auth session + CSRF (session-based) untuk seluruh API; role admin/staff/student.
 
 ## Persyaratan
 
-- PHP 8.3+ (`curl`, `openssl`, `mbstring`, `pdo_mysql`, `gd`, `fileinfo`, `intl`, `zip`)
+- PHP 8.4+ (`curl`, `openssl`, `mbstring`, `pdo_mysql`, `gd`, `fileinfo`, `intl`, `zip`)
 - Composer 2+
 - MySQL 8
 - Node.js 18+ (untuk frontend)
@@ -33,11 +34,10 @@ php artisan storage:link
 # buat database MySQL bernama campus_lost_found, lalu:
 php artisan migrate --seed
 
-# 3. Frontend
+# 3. Frontend (build ke public/ agar tersaji sebagai SPA)
 cd frontend
 npm install
-npm run build
-cp dist/* ../public/        # pindahkan build SPA ke public Laravel
+npm run build      # hasil (dist) disalin & di-rebuild ke public/assets + index.html
 cd ..
 ```
 
@@ -55,20 +55,17 @@ php artisan serve                # terminal 1 — backend http://localhost:8000
 cd frontend && npm run dev       # terminal 2 — SPA http://localhost:5173 (proxy /api & /storage ke 8000)
 ```
 
-Postingan baru mulai `pending` dan muncul untuk publik setelah **approve** oleh admin
-(Admin → Report Moderation).
-
 ## Produksi
 
-1. `cd frontend && npm install && npm run build`
-2. Salin `frontend/dist/*` ke `public/` (rata ke root `public/index.html`)
+1. `cd frontend && npm install && npm run build` (menghasilkan `dist/`, disalin ke `public/`)
+2. `php artisan serve` di server; akses via HTTPS bila perlu
 3. Pastikan `php artisan storage:link` jalan (foto diakses via `/storage/...`)
 
 ## Struktur
 
-- `app/Http/Controllers/` — Auth, Item, Claim, Notification, Dashboard, Admin
-- `app/Services/MatchingService.php` — logika pencocokan possible match
-- `app/Support/ApiResponse.php` — format respons `{success, data}` / `{success, message}`
+- `app/Http/Controllers/` — Auth, Item, Claim, Notification, Message, Dashboard, Admin
+- `app/Services/` — `MatchingService` (possible match + notifikasi dua arah), `ApiResponse`
 - `routes/api.php` — seluruh endpoint API (session + CSRF via middleware `web`)
+- `frontend/` — SPA Vue 3 + Vite (sumber; build ke `public/`)
+- `public/assets/` — hasil build SPA
 - `database/migrations` + `database/seeders` — skema & data awal
-- `frontend/` — SPA Vue 3 (terpisah, build ke `frontend/dist`)
