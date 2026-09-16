@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
     <div class="mb-8">
-      <h1 class="text-3xl font-bold">Selamat {{ greeting }} 👋</h1>
+      <h1 class="text-3xl font-bold">Selamat {{ greeting }} </h1>
       <p class="text-text-secondary mt-1">Lacak barang hilang dan temuanmu.</p>
     </div>
 
