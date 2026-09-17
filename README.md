@@ -2,6 +2,10 @@
 
 Platform **SPA** untuk melapor, mencari, mencocokkan, dan mengklaim barang hilang & ditemukan di kampus. Backend Laravel (MySQL) + SPA Vue 3 + Tailwind.
 
+## Tampilan (mobile)
+
+![Tampilan aplikasi di Galaxy Tab S7](docs/screenshots/mobile-Galaxy_Tab_S7.png)
+
 ## Fitur
 
 - **Auto-publish** — laporan langsung tampil untuk semua orang (moderasi admin tetap ada sebagai jalur lanjutan/penurunan, bukan penunda).
