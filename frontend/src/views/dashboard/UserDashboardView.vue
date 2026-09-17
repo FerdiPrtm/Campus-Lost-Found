@@ -7,9 +7,9 @@
 
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-3 sm:gap-4 mb-10">
-      <div v-for="s in statCards" :key="s.label" class="card p-4 sm:p-5 text-center">
+      <div v-for="s in statCards" :key="s.label" class="card p-4 sm:p-5 flex flex-col items-center justify-center text-center">
         <p class="text-2xl sm:text-3xl font-bold text-text-primary tabular-nums">{{ s.value }}</p>
-        <p class="text-sm text-text-secondary mt-1">{{ s.label }}</p>
+        <p class="text-sm text-text-secondary mt-1 min-h-10 flex items-center justify-center">{{ s.label }}</p>
       </div>
     </div>
 
